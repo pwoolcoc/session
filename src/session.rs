@@ -18,6 +18,7 @@ pub trait Store : cookies::KeyProvider {
     type Session: Encodable + Decodable + Default + Debug;
 
     fn timeout() -> Duration { Duration::minutes(60) }
+    fn cookie_template() -> Cookie { Cookie::new(COOKIE_KEY.into(), "".into()) }
 }
 
 // Plugin boilerplate
@@ -50,8 +51,9 @@ where T: 'static + Any + Encodable + Decodable + Default + Debug,
             };
 
             let jar = response.cookies_mut().encrypted();
-            let mut cookie = Cookie::new(COOKIE_KEY.into(), encoded);
+            let mut cookie = D::cookie_template();
             cookie.httponly = true;
+            cookie.value = encoded;
             jar.add(cookie);
         });
 
